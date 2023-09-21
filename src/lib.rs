@@ -6,14 +6,14 @@ pub mod instruction;
 
 use crate::instruction::Instruction;
 
-use embedded_hal::blocking::delay::DelayMs;
-use embedded_hal::blocking::spi;
-use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::delay::DelayUs;
+use embedded_hal::spi;
+use embedded_hal::digital::OutputPin;
 
 /// ST7735 driver to connect to TFT displays.
 pub struct ST7735<SPI, DC, RST>
 where
-    SPI: spi::Write<u8>,
+    SPI: spi::SpiDevice,
     DC: OutputPin,
     RST: OutputPin,
 {
@@ -50,7 +50,7 @@ pub enum Orientation {
 
 impl<SPI, DC, RST> ST7735<SPI, DC, RST>
 where
-    SPI: spi::Write<u8>,
+    SPI: spi::SpiDevice,
     DC: OutputPin,
     RST: OutputPin,
 {
@@ -82,7 +82,7 @@ where
     /// Runs commands to initialize the display.
     pub fn init<DELAY>(&mut self, delay: &mut DELAY) -> Result<(), ()>
     where
-        DELAY: DelayMs<u8>,
+        DELAY: DelayUs,
     {
         self.hard_reset(delay)?;
         self.write_command(Instruction::SWRESET, &[])?;
@@ -117,7 +117,7 @@ where
 
     pub fn hard_reset<DELAY>(&mut self, delay: &mut DELAY) -> Result<(), ()>
     where
-        DELAY: DelayMs<u8>,
+        DELAY: DelayUs,
     {
         self.rst.set_high().map_err(|_| ())?;
         delay.delay_ms(10);
@@ -245,9 +245,9 @@ where
 }
 
 #[cfg(feature = "graphics")]
-extern crate embedded_graphics;
+extern crate embedded_graphics_core;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::{
+use self::embedded_graphics_core::{
     draw_target::DrawTarget,
     pixelcolor::{
         raw::{RawData, RawU16},
@@ -260,7 +260,7 @@ use self::embedded_graphics::{
 #[cfg(feature = "graphics")]
 impl<SPI, DC, RST> DrawTarget for ST7735<SPI, DC, RST>
 where
-    SPI: spi::Write<u8>,
+    SPI: spi::SpiDevice,
     DC: OutputPin,
     RST: OutputPin,
 {
@@ -327,7 +327,7 @@ where
 #[cfg(feature = "graphics")]
 impl<SPI, DC, RST> OriginDimensions for ST7735<SPI, DC, RST>
 where
-    SPI: spi::Write<u8>,
+    SPI: spi::SpiDevice,
     DC: OutputPin,
     RST: OutputPin,
 {
