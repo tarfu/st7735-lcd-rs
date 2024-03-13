@@ -6,7 +6,7 @@ pub mod instruction;
 
 use crate::instruction::Instruction;
 
-use embedded_hal::delay::DelayUs;
+use embedded_hal::delay::DelayNs;
 use embedded_hal::spi;
 use embedded_hal::digital::OutputPin;
 
@@ -82,7 +82,7 @@ where
     /// Runs commands to initialize the display.
     pub fn init<DELAY>(&mut self, delay: &mut DELAY) -> Result<(), ()>
     where
-        DELAY: DelayUs,
+        DELAY: DelayNs,
     {
         self.hard_reset(delay)?;
         self.write_command(Instruction::SWRESET, &[])?;
@@ -117,7 +117,7 @@ where
 
     pub fn hard_reset<DELAY>(&mut self, delay: &mut DELAY) -> Result<(), ()>
     where
-        DELAY: DelayUs,
+        DELAY: DelayNs,
     {
         self.rst.set_high().map_err(|_| ())?;
         delay.delay_ms(10);
